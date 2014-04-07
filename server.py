@@ -1,6 +1,6 @@
 import select, socket, sys
 
-host = ''
+host = socket.gethostname()
 port = 50000
 backlog = 5
 size = 1024
@@ -9,6 +9,7 @@ server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 server.bind((host,port))
 server.listen(backlog)
 input = [server,sys.stdin]
+
 running = 1
 while running:
     inputready, outputready, exceptready = select.select(input,[],[])
@@ -23,7 +24,9 @@ while running:
             running = 0
         else:
             #handle all other sockets
+            
             data = s.recv(size)
+            
             sys.stdout.write(data.decode())
             if data:
                 s.send(data)
