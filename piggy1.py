@@ -89,7 +89,7 @@ def EvalParam(parser):
  
     if(parser.lacctport != None):
         if(parser.lacctport != "*"):
-            lacctport = parser.lacctport
+            acctport = parser.lacctport
         else:
             allacctport = True
     
@@ -104,13 +104,64 @@ def EvalParam(parser):
 
 
 def main(argv):
-    
+    size = 1024
     parser = Commandline_Param(argv)
     EvalParam(parser)
     
     test()
     
+    #if noleft is true then take from keyboard input
+    if noleft == False:
+        piggyl = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        piggyl.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        piggyl.bind((laddr, useport))
+        piggyl.listen(5)
     
+    if noright == False:
+        piggyr = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        piggyr.connect((raddr, int(acctport)))
+        input = [piggyl, sys.stdin]
+
+    running = 1
+    while running:
+        if (noright == False && noleft == False) or (noright == True && noleft == False):
+            inputready, outpuready, exceptready = select.select(input, [],[])
+            for s in inputready:
+                if s == piggyl:
+                    client, address = piggyl.accept()
+                    input.append(client)
+                elif s == sys.stdin:
+                    junk = sys.stdin.readline()
+                    running = 0
+                else:
+                    data = s.recv(size)
+                    sys.stdout.write(data.decode())
+                    if(noright == False):
+                        if data:
+                            piggyr.send(data)
+                            #recieve message back from server
+                            #data = piggyr.recv(size)
+                            #sys.stdout.write(data.decode())
+                            #if data:
+                            #    s.send(data)
+                        else:
+                            s.close()
+                            input.remove(s)
+                    
+        elif noright == False && noleft == True:
+            #Head piggy so take keyboard input
+            line = sys.stdin.readline()
+            if line == ' ':
+                break
+                
+            piggyr.send(line.encode())
+            sys.stdout.write(data.decode())
+        
+            
+            
+    piggyl.close()
+    
+        
 
 if __name__=="__main__":
     main(sys.argv[1:])
