@@ -1,7 +1,7 @@
 import select, socket, sys, getopt, collections
 import argparse
 
-acctport = None
+acctport = 36763
 useport = 36763
 laddr = None
 raddr = None
@@ -28,6 +28,8 @@ def test():
     global allacctport
     global alluseport
 
+    
+    
     print("""acctport - %s\n
     allacctport - %s\n
     useport - %d\n
@@ -80,12 +82,14 @@ def EvalParam(parser):
             ralladdr = True
     #if -noright was raised in commandline, -raddr option is to be ignored
     if(parser.noright == True):
-        noright = True;
-        raddr = None;
+        noright = True
+        raddr = None
+        ralladdr = False
     #if -noleft was raised in commandline, -laddr option is to be ignored    
     if(parser.noleft == True):
-        noleft = True;
-        laddr = None;
+        noleft = True
+        laddr = None
+        ralladdr = False
  
     if(parser.lacctport != None):
         if(parser.lacctport != "*"):
@@ -103,63 +107,82 @@ def EvalParam(parser):
 
 
 
-def main(argv):
-    size = 1024
-    parser = Commandline_Param(argv)
-    EvalParam(parser)
-    
-    test()
-    
-    #if noleft is true then take from keyboard input
-    if noleft == False:
-        piggyl = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        piggyl.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        piggyl.bind((laddr, useport))
-        piggyl.listen(5)
-    
-    if noright == False:
-        piggyr = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        piggyr.connect((raddr, int(acctport)))
-        input = [piggyl, sys.stdin]
 
-    running = 1
-    while running:
-        if (noright == False && noleft == False) or (noright == True && noleft == False):
-            inputready, outpuready, exceptready = select.select(input, [],[])
-            for s in inputready:
-                if s == piggyl:
-                    client, address = piggyl.accept()
-                    input.append(client)
-                elif s == sys.stdin:
-                    junk = sys.stdin.readline()
-                    running = 0
-                else:
-                    data = s.recv(size)
-                    sys.stdout.write(data.decode())
-                    if(noright == False):
-                        if data:
-                            piggyr.send(data)
-                            #recieve message back from server
-                            #data = piggyr.recv(size)
-                            #sys.stdout.write(data.decode())
-                            #if data:
-                            #    s.send(data)
-                        else:
+def main(argv):
+    try:
+        size = 1024
+        parser = Commandline_Param(argv)
+        EvalParam(parser)
+        
+        test()
+        
+        #if noleft is true then take from keyboard input
+        if noleft == False:
+            piggyl = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            piggyl.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            #if lalladdr != True:
+            #    piggyl.bind((laddr, useport))
+            #else:
+            piggyl.bind((socket.gethostname(), useport))
+            piggyl.listen(5)
+            input = [piggyl, sys.stdin]
+        if noright == False:
+            piggyr = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            
+            piggyr.connect((raddr, int(acctport)))
+        
+
+        running = 1
+        while running:
+            
+            if (noright == False and noleft == False) or (noright == True and noleft == False):
+                inputready, outpuready, exceptready = select.select(input, [],[])
+                for s in inputready:
+                    
+                    if s == piggyl:
+                        client, address = piggyl.accept()
+                        input.append(client)
+                    elif s == sys.stdin:
+                        junk = sys.stdin.readline()
+                        running = 0
+                    else:
+                        if s.getpeername()[0] != laddr and laddr != None:
                             s.close()
                             input.remove(s)
-                    
-        elif noright == False && noleft == True:
-            #Head piggy so take keyboard input
-            line = sys.stdin.readline()
-            if line == ' ':
-                break
+                            break
+                        data = s.recv(size)
+                        
+                        print("Recieved %s from %s" %(data.decode(),s.getpeername()))
+                        if(noright == False):
+                            if data:
+                                piggyr.send(data)
+                                #recieve message back from server
+                                #data = piggyr.recv(size)
+                                #sys.stdout.write(data.decode())
+                                #if data:
+                                #    s.send(data)
+                            #else:
+                            #    s.close()
+                            #    input.remove(s)
+                                
+                        
                 
-            piggyr.send(line.encode())
-            sys.stdout.write(data.decode())
-        
+            elif noright == False and noleft == True:
+                #Head piggy so take keyboard input
+                line = sys.stdin.readline()
+                if line == ' ':
+                    break
+                
+                piggyr.send(line.encode())
             
+            else:
+            #    print("ParameterError: You must include either raddr or laddr\n")
+                break
             
-    piggyl.close()
+        if (noright == False and noleft == False) or (noright == True and noleft == False):
+            piggyl.close()
+    except TypeError:
+        print("ParameterError: You must include either raddr or laddr\n")
     
         
 
