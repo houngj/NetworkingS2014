@@ -1,8 +1,8 @@
 import select, socket, sys, getopt, collections
 
 def main(argv):
-    IP = 'localhost'
-    port = 50000
+    IP = socket.gethostname()
+    port = 36763
     size = 1024
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     
@@ -17,17 +17,17 @@ def main(argv):
         if opt in "-s":
             IP=arg
         elif opt in "-p":
-            port = arg
-    s.connect((socket.gethostbyname(IP),port))
+            port = int(arg)
+    s.connect((IP,port))
     while 1:
         line = sys.stdin.readline()
         if line == ' ':
             break
     
         s.send(line.encode())
-        data = s.recv(size)
-        sys.stdout.write(data.decode())
-        sys.stdout.write('%')
+        #data = s.recv(size)
+        #sys.stdout.write(data.decode())
+        #sys.stdout.write('%')
 
     s.close()
 

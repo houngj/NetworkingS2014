@@ -152,19 +152,25 @@ def main(argv):
                             break
                         data = s.recv(size)
                         
+                        
+                        
                         print("Recieved %s from %s" %(data.decode(),s.getpeername()))
+                        
                         if(noright == False):
                             if data:
                                 piggyr.send(data)
                                 #recieve message back from server
-                                #data = piggyr.recv(size)
-                                #sys.stdout.write(data.decode())
-                                #if data:
-                                #    s.send(data)
-                            #else:
-                            #    s.close()
-                            #    input.remove(s)
-                                
+                                data = piggyr.recv(size)
+                                sys.stdout.write(data.decode())
+                                if data:
+                                    s.send(data)
+                                else:
+                                    s.close()
+                                    input.remove(s)
+                            else:
+                                s.close()
+                                input.remove(s)
+                        
                         
                 
             elif noright == False and noleft == True:
@@ -174,7 +180,9 @@ def main(argv):
                     break
                 
                 piggyr.send(line.encode())
-            
+                data = piggyr.recv(size)
+                print(data.decode())
+                print('%')
             else:
             #    print("ParameterError: You must include either raddr or laddr\n")
                 break
