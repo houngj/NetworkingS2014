@@ -78,14 +78,7 @@ class Param:
             if(parser.raddr != "*"):
                 self.raddr = parser.raddr
             
-        #if -noright was raised in commandline, -raddr option is to be ignored
-        if(parser.noright == True):
-            self.noright = True
-            self.raddr = None
-        #if -noleft was raised in commandline, -laddr option is to be ignored    
-        if(parser.noleft == True):
-            self.noleft = True
-            self.laddr = None
+        
  
         if(parser.lacctport != None):
             if(parser.lacctport != "*"):
@@ -108,6 +101,19 @@ class Param:
         if(parser.loopl == True):
             self.loopl = True
         
+        #if -noright was raised in commandline, -raddr option is to be ignored, direction parameters ignored
+        if(parser.noright == True):
+            self.noright = True
+            self.raddr = None
+            self.dsprl = False
+            self.dsplr = True
+        #if -noleft was raised in commandline, -laddr option is to be ignored, direction parameters ignored    
+        if(parser.noleft == True):
+            self.noleft = True
+            self.laddr = None
+            self.dsprl = True
+            self.dsplr = False
+            
     def checkladdr(self, s):
         if (s.getpeername()[0] != self.laddr and self.laddr != None):
             return True
@@ -120,6 +126,13 @@ class Param:
         else:
             return False
     
+    def Error(self):
+        if(self.laddr == None and self.raddr == None and self.noright == False) or (self.noleft == True and self.noright == True):
+            return True
+        else:
+            return False
+        
+        
     
     
 
