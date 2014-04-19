@@ -1,6 +1,7 @@
 import select, socket, sys
 from piggy_util import Param
 
+
 def main(argv):
     
     ParamVars = Param()
@@ -10,17 +11,19 @@ def main(argv):
     Eflag = True
     ParamVars.test()
     Imode = False
+    lside = None
     while(1):
         
         if not(ParamVars.Error()):
             
             #Create left connection
-            if ParamVars.get_noleft() == False:
-                piggyl = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                piggyl.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-                piggyl.bind((socket.gethostname(), 36763))
-                piggyl.listen(5)
-                input = [piggyl, sys.stdin]
+            #if ParamVars.get_noleft() == False:
+                
+            piggyl = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            piggyl.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            piggyl.bind((socket.gethostname(), 36763))
+            piggyl.listen(5)
+            input = [piggyl, sys.stdin]
         
                 #Creat right connection
             if ParamVars.get_noright() == False:
@@ -34,8 +37,7 @@ def main(argv):
             while running:
                 
                 #Either found an end piggy or a middle piggy
-                if (ParamVars.get_noright() == False and ParamVars.get_noleft() == False) or (ParamVars.get_noright() == True and ParamVars.get_noleft() == False):
-                
+                if (ParamVars.get_noright() == False and ParamVars.get_noleft() == False) or (ParamVars.get_noright() == True and ParamVars.get_noleft() == False):                
                     inputready, outpuready, exceptready = select.select(input, [],[])
                     for s in inputready:
                         if s == piggyl:
@@ -48,9 +50,32 @@ def main(argv):
                                 Imode = True
                                 message = sys.stdin.readline()
                                 print("Insert %s\n" %message)
+                                #detect for escape character
+                                
+                                if "exit\n" == message:
+                                    Imode = False
+                                    message = sys.stdin.readline()
+                            if(Imode == True):
+                                ParamVars.set_outputl(True)
+                                print(lside)
+                                if(ParamVars.get_outputl() == True and lside != None):
+                                    if message:
+                                        print("Message Sent\n")
+                                        lside.send(message)
+                                if(ParamVars.get_outputr() == True):
+                                    if message:
+                                        piggyr.send(message)
+                            
                             #running = 0
                         else:
+                            lside = s
+                            #if(Imode == True):
+                                #ParamVars.set_outputl(True)
+                            #    if(ParamVars.get_outputl() == True):
+                            #        if message:
+                            #            s.send(message)
                             if(ParamVars.checkladdr(s) or ParamVars.checkacctport(s)):
+                                print("Connection rejected")
                                 s.close()
                                 input.remove(s)
                                 break
@@ -90,25 +115,33 @@ def main(argv):
                     
                 #found a head piggy
                 elif ParamVars.get_noright() == False and ParamVars.get_noleft() == True:
-                    if(Imode == False):
-                        line = sys.stdin.readline()
-                    if(line == "i\n" or Imode == True):
-                        Imode = True
-                        line = sys.stdin.readline()
-                        print("Insert %s\n" %line)
-                        if(line == "exit\n"):
-                            Imode = False
-                            
-                    else:
-                        #Head piggy so take keyboard input
-                        if line == ' ':
-                            break
-                    
-                        piggyr.send(line.encode())
-                        data = piggyr.recv(size)
-                        if(ParamVars.get_dsprl() == True):
-                            print("From right side: %s" %data.decode())
-                
+                    #inputready, outputready, exceptready = select.select(input,[],[])
+                    #for s in inputready:
+                    #    print inputready[2]
+                    #    if s == piggyl:
+                    #        print("I dont even know\n")
+                    #        client, address = piggyl.accept()
+                    #        input.append(client)
+                    #    elif s == sys.stdin:
+                    #        line = sys.stdin.readline()
+                    #        print("Recieve from stdin\n")
+                    #        #Head piggy so take keyboard input
+                    #        if line == ' ':
+                    #            break
+                        
+                    #        piggyr.send(line.encode())
+                    #    else:
+                    #        print("recving something\n")
+                    #        data = s.recv(size)
+                    #        if(ParamVars.get_dsprl() == True):
+                    #            print("From right side: %s" %data.decode())
+                    line = sys.stdin.readline()
+                    if line == ' ':
+                        break
+                    piggyr.send(line.encode())
+                    data = piggyr.recv(size)
+                    if(ParamVars.get_dsprl() == True):
+                        print("From right side: %s" %data.decode())
                 
                 else:
                     break

@@ -1,4 +1,4 @@
-import argparse
+import argparse, socket
 
 class Param:
     def __init__(self):
@@ -12,7 +12,13 @@ class Param:
         self.dsprl = False
         self.loopr = False
         self.loopl = False
+        self.outputl = False
+        self.outputr = True
 
+    def get_outputl(self):
+        return self.outputl
+    def get_outputr(self):
+        return self.outputr
     def get_noleft(self):
         return self.noleft
     def get_acctport(self):
@@ -33,6 +39,19 @@ class Param:
         return self.loopr
     def get_loopl(self):
         return self.loopl
+
+    def set_outputl(self, Val):
+        self.outputl = Val
+    def set_outputr(self, Val):
+        self.outputr = Val
+    def set_dsplr(self, Val):
+        self.dsplr = Val
+    def set_dsprl(self, Val):
+        self.dsprl = Val
+    def set_noright(self, Val):
+        self.noright = Val
+    def set_noleft(self, Val):
+        self.noleft = Val
     
     def Commandline_Param(self,argv):
         parser = argparse.ArgumentParser(description="Parse commandline parameters")
@@ -63,7 +82,9 @@ class Param:
         dsplr - %s\n
         dsprl - %s\n
         loopr - %s\n
-        loopl - %s\n""" %(self.acctport, self.useport, self.laddr, self.raddr, self.noleft, self.noright, self.dsplr, self.dsprl, self.loopr, self.loopl))
+        loopl - %s\n
+        outputr - %s\n
+        outputl - %s\n""" %(self.acctport, self.useport, self.laddr, self.raddr, self.noleft, self.noright, self.dsplr, self.dsprl, self.loopr, self.loopl, self.outputr, self.outputl))
         
 
 
@@ -71,12 +92,12 @@ class Param:
     def EvalParam(self, parser):
         if(parser.laddr != None):
             if(parser.laddr != "*"):
-                self.laddr = parser.laddr
+                self.laddr = socket.gethostbyname(parser.laddr)
                 
                 
         if(parser.raddr != None):
             if(parser.raddr != "*"):
-                self.raddr = parser.raddr
+                self.raddr = socket.gethostbyname(parser.raddr)
             
         
  
@@ -101,12 +122,14 @@ class Param:
         if(parser.loopl == True):
             self.loopl = True
         
-        #if -noright was raised in commandline, -raddr option is to be ignored, direction parameters ignored
+        #if -noright was raised in commandline, -raddr option is to be ignored, direction parameters ignored, output to left
         if(parser.noright == True):
             self.noright = True
             self.raddr = None
             self.dsprl = False
             self.dsplr = True
+            self.outputl = True
+            self.outputr = False
         #if -noleft was raised in commandline, -laddr option is to be ignored, direction parameters ignored    
         if(parser.noleft == True):
             self.noleft = True
@@ -114,11 +137,15 @@ class Param:
             self.dsprl = True
             self.dsplr = False
             
+            
+            
     def checkladdr(self, s):
+            
         if (s.getpeername()[0] != self.laddr and self.laddr != None):
             return True
         else:
             return False
+        
         
     def checkacctport(self, s):
         if(s.getpeername()[1] is self.acctport and self.acctport != ""):
