@@ -159,23 +159,7 @@ class Param:
         else:
             return False
         
-    def IamHead(self):
-        if(self.noright == False and self.noleft == True):
-            return True
-        else:
-            return False
-
-    def IamTail(self):
-        if(self.noright == True and self.noleft == False):
-            return True
-        else:
-            return False
-            
-    def IamMiddle(self):
-        if(self.noright == False and self.noleft == False):
-            return True
-        else:
-            return False
+        
     
     
 

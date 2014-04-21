@@ -1,4 +1,4 @@
-import argparse, socket
+import argparse, socket, sys
 
 class Param:
     def __init__(self):
@@ -159,8 +159,64 @@ class Param:
         else:
             return False
         
-        
+    def IamHead(self):
+        if(self.noright == False and self.noleft == True):
+            return True
+        else:
+            return False
+
+    def IamTail(self):
+        if(self.noright == True and self.noleft == False):
+            return True
+        else:
+            return False
+            
+    def IamMiddle(self):
+        if(self.noright == False and self.noleft == False):
+            return True
+        else:
+            return False
     
     
+    def doCommand(self, message):
+        if message == ":outputl\n":
+            if self.IamHead() == True:
+                print("No connection to the left\n")
+            else:
+                self.outputl = True
+                self.outputr = False
+            return True
+        elif message == ":outputr\n":
+            if self.IamTail() == True:
+                print("No connection tot he right\n")
+            else:
+                self.outputr = True
+                self.outputl = False
+            return True
+        elif message == ":dsplr\n":
+            self.dsplr = True
+            self.dsprl = False
+            return True
+        elif message == ":dsprl\n":
+            self.dsplr = False
+            self.dsprl = True
+            return True
+        elif message == ":noright\n":
+            self.noright = True
+            return True
+        elif message == ":noleft\n":
+            self.noleft = True
+            return True
+        elif message == ":loopr\n":
+            self.loopr = True
+            return True
+        elif message == ":loopl\n":
+            self.loopl = True
+            return True
+        elif message == ":q\n":
+            sys.exit()
+            return True
+        else:
+            return False
 
     
