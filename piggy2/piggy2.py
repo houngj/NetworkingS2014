@@ -66,7 +66,7 @@ def main(argv):
                                 Imode = True
                                 #if(not(ParamVars.IamHead())):
                                 #   message = sys.stdin.readline()
-                                if message == "exit!\n":
+                                if message.strip() == chr(27):
                                     Imode = False
                                 else:
                                     if ParamVars.get_outputr():
