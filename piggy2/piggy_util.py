@@ -1,5 +1,17 @@
 import argparse, socket, sys
 
+def sendLeft(message, lcon):
+    #try:
+    lcon.send(message)
+    #except socket.error:
+    #    print("Broken Pipe Detected to the Left\n")
+
+def sendRight(message, rcon):
+    try:
+        rcon.send(message)
+    except socket.error:
+        print("Broken Pipe Detected to the Right\n")
+
 class Param:
     def __init__(self):
         self.acctport = ""
@@ -140,18 +152,23 @@ class Param:
             
             
     def checkladdr(self, s):
-            
-        if (s.getpeername()[0] != self.laddr and self.laddr != None):
-            return True
-        else:
-            return False
+        try:
+            if (s.getpeername()[0] != self.laddr and self.laddr != None):
+                return True
+            else:
+                return False
+        except socket.error:
+            None
         
         
     def checkacctport(self, s):
-        if(s.getpeername()[1] is self.acctport and self.acctport != ""):
-            return True
-        else:
-            return False
+        try:
+            if(s.getpeername()[1] is self.acctport and self.acctport != ""):
+                return True
+            else:
+                return False
+        except socket.error:
+            None
     
     def Error(self):
         if(self.laddr == None and self.raddr == None and self.noright == False) or (self.noleft == True and self.noright == True):

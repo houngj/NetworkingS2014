@@ -1,6 +1,5 @@
 import select, socket, sys
-from piggy_util import Param
-
+from piggy_util import *
 def main(argv):
 
     ParamVars = Param()
@@ -10,6 +9,7 @@ def main(argv):
     ParamVars.test()
     Eflag = True
     Imode = False
+    lcon = 0
     if ParamVars.IamHead() == True:
         Imode = True
     while(1):
@@ -63,17 +63,26 @@ def main(argv):
                                     ParamVars.set_outputr(True)
                                 message = sys.stdin.readline()
                             if message == "i\n" or Imode == True:
+                                if Imode == False:
+                                    message = sys.stdin.readline()
                                 Imode = True
+                                
                                 #if(not(ParamVars.IamHead())):
                                 #   message = sys.stdin.readline()
                                 if message.strip() == chr(27):
                                     Imode = False
                                 else:
                                     if ParamVars.get_outputr():
-                                        piggyr.send(message)
-                                    else:
-                                        lcon.send(message)
-                            
+                                        if ParamVars.get_loopl:
+                                            sendLeft(message, lcon)
+                                        else:
+                                            sendRight(message, piggyr)
+                                    if ParamVars.get_outputl(): 
+                                        if ParamVars.get_loopr:
+                                            sendRight(message, piggyr)
+                                        else:
+                                            sendLeft(message, lcon)
+                                        
                     #Recieve from right
                     elif s == piggyr and piggyr != 0:
                         message = s.recv(size)
@@ -83,22 +92,29 @@ def main(argv):
                             
                             if(ParamVars.IamMiddle() or ParamVars.IamTail()):
                                 if ParamVars.get_loopr():
-                                    piggyr.send(message)
+                                    sendRight(message, piggyr)
                                 else:
-                                    lcon.send(message)
+                                    sendLeft(message, lcon)
+                                    
                         else:
                             break
                     #recieve from left
                     elif s != 0:
                         lcon = s
+                        
                         if(ParamVars.checkladdr(s) or ParamVars.checkacctport(s)):
                             print("Connection rejected")
                             s.close()
                             input.remove(s)
                             break
-                        
-                        data = s.recv(size)
-                        
+                        try:
+                            data = s.recv(size)
+                            if data == "":
+                                s.close()
+                                input.remove(s)
+                        except socket.error:
+                            print("Connection stopped from the left\n")
+
                         if data:
                             if(ParamVars.get_dsplr() == True):
                                 print("From left side: %s" %data.decode())
@@ -106,12 +122,12 @@ def main(argv):
                             if(ParamVars.IamHead() or ParamVars.IamMiddle()):
                                 if data:
                                     if ParamVars.get_loopl():
-                                        s.send(data)
+                                        sendLeft(data, s)
                                     else:
-                                        piggyr.send(data)
+                                        sendRight(data, piggyr)
                             else:
                                 if data:
-                                    s.send(data)
+                                    sendLeft(data, s)
                             sys.stdout.flush()
                     
 
