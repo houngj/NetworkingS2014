@@ -2,7 +2,8 @@ import argparse, socket, sys
 
 def sendLeft(message, lcon):
     #try:
-    lcon.send(message)
+    if lcon != 0:
+        lcon.send(message)
     #except socket.error:
     #    print("Broken Pipe Detected to the Left\n")
 
