@@ -89,17 +89,17 @@ def main(argv):
                         if message.strip() == chr(27):
                             Imode = False
                         else:
-                            if(ParamVars.get_loopr() != True and ParamVars.get_loopl() != True):
-                                if ParamVars.get_outputr():
-                                    if ParamVars.get_loopr():
-                                        sendLeft(message, lcon)
-                                    else:
-                                        sendRight(message, piggyr)
-                                if ParamVars.get_outputl(): 
-                                    if ParamVars.get_loopl():
-                                        sendRight(message, piggyr)
-                                    else:
-                                        sendLeft(message, lcon)
+                            #if(ParamVars.get_loopr() != True and ParamVars.get_loopl() != True):
+                            if ParamVars.get_outputr():
+                                if ParamVars.get_loopr():
+                                    sendLeft(message, lcon)
+                                else:
+                                    sendRight(message, piggyr)
+                            if ParamVars.get_outputl(): 
+                                if ParamVars.get_loopl():
+                                    sendRight(message, piggyr)
+                                else:
+                                    sendLeft(message, lcon)
                                         
             #Recieve from right
             elif s == piggyr and piggyr != 0:
@@ -111,13 +111,14 @@ def main(argv):
                     if(ParamVars.get_dsprl()):
                         print("Recieve from the right: %s" %message.decode())
                             
-                    if(ParamVars.IamMiddle() or ParamVars.IamTail()):
-                        if not(ParamVars.get_loopl() and ParamVars.get_loopr()):
-                            if ParamVars.get_loopl():
-                                sendRight(message, piggyr)
-                            else:
-                                sendLeft(message, lcon)
-                                    
+                    #if(ParamVars.IamMiddle() or ParamVars.IamTail()):
+                    #if not(ParamVars.get_loopl() and ParamVars.get_loopr()):
+                    if ParamVars.get_loopl():
+                        sendRight(message, piggyr)
+                    else:
+                        sendLeft(message, lcon)
+                    
+                        
                 else:
                     break
             #recieve from left
