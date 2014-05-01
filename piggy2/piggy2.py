@@ -59,10 +59,12 @@ def main(argv):
                     if ParamVars.doCommand(message) == True and Imode == False:
                         if ParamVars.get_noright() == True:
                             try:
-                                piggyr.close()
-                                input.remove(piggyr)
-                                rfound = False
-                            except UnboundLocalError:
+                                
+                                if piggyr != 0:
+                                    piggyr.close()
+                                    input.remove(piggyr)
+                                    rfound = False
+                            except UnboundLocalError, AttributeError:
                                 None
                             ParamVars.set_outputl(True)
                             ParamVars.set_outputr(False)
@@ -145,7 +147,7 @@ def main(argv):
                                     sendLeft(data, s)
                                 else:
                                     sendRight(data, piggyr)
-                    else:
+                    elif ParamVars.get_loopr():
                         if data:
                             sendLeft(data, s)
                     sys.stdout.flush()
