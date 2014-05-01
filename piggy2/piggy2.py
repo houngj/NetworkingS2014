@@ -70,8 +70,9 @@ def main(argv):
                             ParamVars.set_outputr(False)
                         if ParamVars.get_noleft() == True:
                             try:
-                                lcon.close()
-                                input.remove(lcon)
+                                if lcon != 0:
+                                    lcon.close()
+                                    input.remove(lcon)
                             except UnboundLocalError:
                                 None
                             ParamVars.set_outputl(False)
