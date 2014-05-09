@@ -105,10 +105,8 @@ def main(argv):
         Imode = True
     #while(1):
     #    if not(ParamVars.Error()):
-            
             #Create a listning connection
-            
-            
+    
     piggy = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     piggy.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     if ParamVars.get_noleft() == False:
@@ -154,7 +152,8 @@ def main(argv):
             screen.refresh()
             box.get_win().refresh()
         running = 1
-        
+        listenlTrue = True
+        listenrTrue = False
         while running:
             
                             
@@ -167,18 +166,49 @@ def main(argv):
                     piggyr = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                     if int(ParamVars.get_useport()) != 36763:
                         piggyr.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-                        piggyr.bind((socket.gethostname(), int(ParamVars.get_useport())))
-                        
-                    piggyr.connect((ParamVars.get_raddr(), 36763))
+                        try:
+                            piggyr.bind((socket.gethostname(), int(ParamVars.get_useport())))
+                            listenrTrue = False
+                            piggyr.connect((ParamVars.get_raddr(), 36763))
+                        except socket.error:
+                            windows[4].get_win().addstr(1, 1, "already using this port\n")    
+                            windows[4].get_win().refresh()
+                    
                     
 
                 input = [piggy, sys.stdin, piggyr]
 
             inputready, outputready, exceptready = select.select(input, [], [])
             for s in inputready:
-                if s == piggy and piggy != 0:
+                if s == piggy and piggy != 0 and listenlTrue:
                     client, address = piggy.accept()
-                    input.append(client)
+                    
+                    if ParamVars.get_lacctip() != None and ParamVars.get_lacctport() != None:
+                        if ParamVars.get_lacctip() == address[0] and ParamVars.get_lacctport == address[1]:
+                            input.append(client)
+                    elif ParamVars.get_lacctip() != None and ParamVars.get_lacctport() == None:
+                        if ParamVars.get_lacctip() == address[0]:
+                            input.append(client)
+                    elif ParamVars.get_lacctip() == None and ParamVars.get_lacctport() != None:
+                        if ParamVars.getlacctport() == address[1]:
+                            input.append(client)
+                    else:
+                        input.append(client)
+
+                    
+                elif s == piggyr and piggyr != 0 and listenrTrue:
+                    client, address = piggyr.accept()
+                    if ParamVars.get_racctip() != None and ParamVars.get_racctport() != None:
+                        if ParamVars.get_racctip() == address[0] and ParamVars.get_racctport == address[1]:
+                            input.append(client)
+                    elif ParamVars.get_racctip() != None and ParamVars.get_racctport() == None:
+                        if ParamVars.get_racctip() == address[0]:
+                            input.append(client)
+                    elif ParamVars.get_racctip() == None and ParamVars.get_racctport() != None:
+                        if ParamVars.getracctport() == address[1]:
+                            input.append(client)
+                    else:
+                        input.append(client)
                 #Keyboard input
                 elif s == sys.stdin:
                     message = ("".join(typed(windows[4]))).strip()
@@ -189,10 +219,43 @@ def main(argv):
                         #doCommand function returns True if message is a command, false otherwise
                         
                         
-                        
-                        if ParamVars.doCommand(message) == True and Imode == False:
+                        Commandval = ParamVars.doCommand(message)
+                        if Commandval == True and Imode == False:
                             
-                            
+                            if ParamVars.get_listenl() != None:
+                                piggy.close()
+                                input.remove(piggy)
+                                piggy = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                                piggy.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+                                try:
+                                    piggy.bind(("", ParamVars.get_listenl()))
+                                
+                                    piggy.listen(5)
+                                    listenlTrue = True
+                                    input.append(piggy)
+                                except socket.error:
+                                    windows[4].get_win().addstr(1, 1, "already using this port\n")    
+                                    windows[4].get_win().refresh()
+                                ParamVars.set_listenl(None)
+                                ParamVars.set_noleft(False)
+                                
+                            if ParamVars.get_listenr() != None:
+                                piggyr.close()
+                                input.remove(piggyr)
+                                piggyr = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                                try:
+                                    piggyr.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+                                
+                                    piggyr.bind(("", ParamVars.get_listenr()))
+                                    piggyr.listen(5)
+                                    intput.append(piggyr)
+                                    listenrTrue = True
+                                except socket.error:
+                                    windows[4].get_win().addstr(1, 1, "already using this port\n")    
+                                    windows[4].get_win().refresh()
+                                ParamVars.set_listenr(None)
+                                ParamVars.set_noright(False)
+                                
                             
                             if ParamVars.get_connectrinput():
                         
@@ -202,12 +265,12 @@ def main(argv):
                                 if int(ParamVars.get_useport()) != 36763:
                                     piggyr.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
                                     piggyr.bind((socket.gethostname(), int(ParamVars.get_useport())))
-                        
+                                listenrTrue = False
                                 piggyr.connect((ParamVars.get_raddr(), 36763))
-                    
-                                input.remove(0)
+                                
+                                #input.remove(0)
                                 input.append(piggyr)
-
+                                
                             if ParamVars.get_connectlinput():
                         
                                 
@@ -216,15 +279,25 @@ def main(argv):
                                 if int(ParamVars.get_useport()) != 36763:
                                     piggyl.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
                                     piggyl.bind((socket.gethostname(), int(ParamVars.get_useport())))
-                        
+                                listenlTrue = False
                                 piggyl.connect((ParamVars.get_laddr(), 36763))
                                 lcon = piggyl
-                                input.remove(0)
+                                
                                 input.append(piggyl)
 
-                            
-                            
-                            
+                            if ParamVars.get_readFile() != None:
+                                ParamVars.set_readFile(None)
+                                filename = (message.split())[1]
+                                file = open(filename, 'r')
+                                text = file.read()
+                                if ParamVars.get_outputl():
+                                    toWindow(windows[2], text)
+                                    sendLeft(text, lcon, windows[4])
+                                if ParamVars.get_outputr():
+                                    toWindow(windows[1], text)
+                                    sendRight(text, piggyr, windows[4])
+                                    
+                                
                             if ParamVars.get_noright() == True:
                                 try:
                                     if piggyr != 0:
@@ -254,6 +327,9 @@ def main(argv):
                                 
                                 windows[4].get_win().refresh()
                                 ParamVars.set_output(False)
+                        elif Commandval != False:
+                            windows[4].get_win().addstr(1, 1, str(Commandval))
+                            windows[4].get_win().refresh()
                             
                                 
                                 
@@ -287,7 +363,7 @@ def main(argv):
                                         else:
                                             toWindow(windows[2], message.decode())
                                             sendLeft(message, lcon, windows[4])
-
+                
                 #Recieve from right
                 elif s == piggyr and piggyr != 0:
                     try:

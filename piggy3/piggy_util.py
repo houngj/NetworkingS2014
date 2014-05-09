@@ -8,6 +8,7 @@ class Param:
     def __init__(self):
         self.acctport = ""
         self.useport = 36763
+        self.luseport = 36763
         self.laddr = None
         self.raddr = None
         self.noleft = False
@@ -21,7 +22,23 @@ class Param:
         self.output = False
         self.connectrinput = False
         self.connectlinput = False
+        self.readFile = None
+        self.listenr = None
+        self.listenl = None
+        self.lacctip = None
+        self.racctip = None
+        self.lacctport = None
+        self.racctport = None
 
+    def get_racctport(self):
+        return self.racctport
+
+    def get_lacctport(self):
+        return self.lacctport
+    def get_lacctip(self):
+        return self.lacctip
+    def get_racctip(self):
+        return self.racctip
     def get_outputl(self):
         return self.outputl
     def get_outputr(self):
@@ -52,7 +69,14 @@ class Param:
         return self.connectrinput
     def get_connectlinput(self):
         return self.connectlinput
+    def get_readFile(self):
+        return self.readFile
+    def get_listenl(self):
+        return self.listenl
+    def get_listenr(self):
+        return self.listenr
 
+        
     def set_outputl(self, Val):
         self.outputl = Val
     def set_outputr(self, Val):
@@ -71,7 +95,13 @@ class Param:
         self.connectrinput = Val
     def set_connectlinput(self, Val):
         self.connectlinput = Val
-        
+    def set_readFile(self, Val):
+        self.readFile = Val
+    def set_listenl(self, Val):
+        self.listenl = Val
+    def set_listenr(self, Val):
+        self.listenr = Val
+    
     def Commandline_Param(self,argv):
         parser = argparse.ArgumentParser(description="Parse commandline parameters")
         
@@ -247,16 +277,80 @@ class Param:
             self.output = True
             return True
         elif message == ":connectr":
-            self.noright = False
-            self.connectrinput = True
-            self.raddr = socket.gethostbyname(splitmessage[1])
-            self.useport = int(splitmessage[2])
-            return True
+            try:
+                self.noright = False
+                self.connectrinput = True
+                self.raddr = socket.gethostbyname(splitmessage[1])
+                self.useport = int(splitmessage[2])
+                return True
+            except:
+                return "Impropper IP or Port; Usage: ':connectr IP Port'"
         elif message == ":connectl":
-            self.noleft = False
-            self.connectlinput = True
-            self.laddr = socket.gethostbyname(splitmessage[1])
-            self.useport = int(splitmessage[2])
+            try:
+                self.noleft = False
+                self.connectlinput = True
+                self.laddr = socket.gethostbyname(splitmessage[1])
+                self.useport = int(splitmessage[2])
+                return True
+            except:
+                return "Impropper IP or Port; Usage: ':connectl IP Port'"
+        elif message == ":listenl":
+            if len(splitmessage) > 1:
+                self.listenl = splitmessage[1]
+            else:
+                self.listenl = 36763
+            return True
+        elif message ==":listenr":
+            if len(splitmessage) > 1:
+                self.listenr = splitmessage[1]
+            else:
+                self.listenr = 36763
+            return True
+        elif message ==":read":
+            self.readFile = splitmessage[1]
+            return True
+        elif message ==":luseport":
+            try:
+                self.luseport = splitmessage[1]
+                return True
+            except:
+                return "improper Port; Usage: ':luseport Port'"
+        elif message ==":ruseport":
+            try:
+                self.useport = splitmessage[1]
+                return True
+            except:
+                return "improper Port; Usage: ':ruseport Port'"
+            None
+        elif message == ":lacctport":
+            
+            try:
+                self.lacctrport = splitmessage[1]
+                return True
+            except:
+                return "improper Port; Usage: ':lacctport Port'"
+            
+        elif message == ":racctport":
+            
+            try:
+                self.lracctrport = splitmessage[1]
+                return True
+            except:
+                return "improper Port; Usage: ':racctport Port'"
+            
+        elif message == ":lacctip":
+            try:
+                self.lacctrip = splitmessage[1]
+                return True
+            except:
+                return "improper IP; Usage: ':lacctip IP'"
+        elif message == ":racctip":
+            try:
+                self.racctrip = splitmessage[1]
+                return True
+            except:
+                return "improper IP; Usage: ':racctip IP'"
+            
         else:
             return False
 
