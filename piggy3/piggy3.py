@@ -112,7 +112,7 @@ def main(argv):
     if ParamVars.get_noleft() == False:
         piggy.bind(("", 36763))
     piggy.listen(5)
-            
+    
     screen = curses.initscr()
     
     
@@ -153,7 +153,10 @@ def main(argv):
             box.get_win().refresh()
         running = 1
         listenlTrue = True
-        listenrTrue = False
+        listenrTrue = True
+        piggyrl = 0
+        clientr = ""
+        client = ""
         while running:
             
                             
@@ -197,18 +200,19 @@ def main(argv):
 
                     
                 elif s == piggyr and piggyr != 0 and listenrTrue:
-                    client, address = piggyr.accept()
+                    clientr, address = piggyr.accept()
+                    
                     if ParamVars.get_racctip() != None and ParamVars.get_racctport() != None:
                         if ParamVars.get_racctip() == address[0] and ParamVars.get_racctport == address[1]:
-                            input.append(client)
+                            input.append(clientr)
                     elif ParamVars.get_racctip() != None and ParamVars.get_racctport() == None:
                         if ParamVars.get_racctip() == address[0]:
-                            input.append(client)
+                            input.append(clientr)
                     elif ParamVars.get_racctip() == None and ParamVars.get_racctport() != None:
                         if ParamVars.getracctport() == address[1]:
-                            input.append(client)
+                            input.append(clientr)
                     else:
-                        input.append(client)
+                        input.append(clientr)
                 #Keyboard input
                 elif s == sys.stdin:
                     message = ("".join(typed(windows[4]))).strip()
@@ -228,7 +232,7 @@ def main(argv):
                                 piggy = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                                 piggy.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
                                 try:
-                                    piggy.bind(("", ParamVars.get_listenl()))
+                                    piggy.bind(("", int(ParamVars.get_listenl())))
                                 
                                     piggy.listen(5)
                                     listenlTrue = True
@@ -240,15 +244,17 @@ def main(argv):
                                 ParamVars.set_noleft(False)
                                 
                             if ParamVars.get_listenr() != None:
-                                piggyr.close()
-                                input.remove(piggyr)
+                                if piggyr != 0:
+                                    piggyr.close()
+                                    input.remove(piggyr)
+                                
                                 piggyr = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                                 try:
                                     piggyr.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
                                 
-                                    piggyr.bind(("", ParamVars.get_listenr()))
+                                    piggyr.bind(("", int(ParamVars.get_listenr())))
                                     piggyr.listen(5)
-                                    intput.append(piggyr)
+                                    input.append(piggyr)
                                     listenrTrue = True
                                 except socket.error:
                                     windows[4].get_win().addstr(1, 1, "already using this port\n")    
@@ -266,7 +272,7 @@ def main(argv):
                                     piggyr.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
                                     piggyr.bind((socket.gethostname(), int(ParamVars.get_useport())))
                                 listenrTrue = False
-                                piggyr.connect((ParamVars.get_raddr(), 36763))
+                                piggyr.connect((ParamVars.get_raddr(), int(ParamVars.get_useport())))
                                 
                                 #input.remove(0)
                                 input.append(piggyr)
@@ -280,7 +286,7 @@ def main(argv):
                                     piggyl.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
                                     piggyl.bind((socket.gethostname(), int(ParamVars.get_useport())))
                                 listenlTrue = False
-                                piggyl.connect((ParamVars.get_laddr(), 36763))
+                                piggyl.connect((ParamVars.get_laddr(), int(ParamVars.get_useport())))
                                 lcon = piggyl
                                 
                                 input.append(piggyl)
@@ -365,7 +371,7 @@ def main(argv):
                                             sendLeft(message, lcon, windows[4])
                 
                 #Recieve from right
-                elif s == piggyr and piggyr != 0:
+                elif (s == piggyr and piggyr != 0) or s == clientr:
                     try:
                         message = s.recv(size)
                     except socket.error:
@@ -388,7 +394,7 @@ def main(argv):
                     else:
                         break
                 #recieve from left
-                elif s != 0:
+                elif s == client:
                     lcon = s
 
                     if(ParamVars.checkladdr(s) or ParamVars.checkacctport(s)):
