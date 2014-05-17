@@ -79,15 +79,18 @@ def typed(windows):
     return buff
 
 def toWindow(window, message):
-    if window.get_row() == 17:
+    
+        
+    try:
+        window.get_win().addstr(window.get_row(), 1, message)
+        window.add_row()
+        window.get_win().border(0)
+        window.get_win().refresh()
+    except curses.error:
         window.set_row(1)
         window.get_win().clear()
         window.get_win().border(0)
         window.get_win().refresh()
-    window.get_win().addstr(window.get_row(), 1, message)
-    window.add_row()
-    window.get_win().border(0)
-    window.get_win().refresh()
     
 def main(argv):
     
@@ -153,7 +156,7 @@ def main(argv):
             box.get_win().refresh()
         running = 1
         listenlTrue = True
-        listenrTrue = True
+        listenrTrue = False
         piggyrl = 0
         clientr = ""
         client = ""
@@ -166,16 +169,15 @@ def main(argv):
                 if ParamVars.get_noright() == False and ParamVars.get_raddr() != None:
                     
                 #Create send connection
-                    piggyr = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                    if int(ParamVars.get_useport()) != 36763:
+                    try:
+                        piggyr = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                         piggyr.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-                        try:
-                            piggyr.bind((socket.gethostname(), int(ParamVars.get_useport())))
-                            listenrTrue = False
-                            piggyr.connect((ParamVars.get_raddr(), 36763))
-                        except socket.error:
-                            windows[4].get_win().addstr(1, 1, "already using this port\n")    
-                            windows[4].get_win().refresh()
+                        #piggyr.bind((socket.gethostname(), int(ParamVars.get_useport())))
+                        listenrTrue = False
+                        piggyr.connect((ParamVars.get_raddr(), 36763))
+                    except socket.error:
+                        windows[4].get_win().addstr(1, 1, "already using this port\n")    
+                        windows[4].get_win().refresh()
                     
                     
 
@@ -217,7 +219,7 @@ def main(argv):
                 elif s == sys.stdin:
                     message = ("".join(typed(windows[4]))).strip()
                     
-                        
+                    
                     if message:
                         
                         #doCommand function returns True if message is a command, false otherwise
@@ -296,12 +298,15 @@ def main(argv):
                                 filename = (message.split())[1]
                                 file = open(filename, 'r')
                                 text = file.read()
-                                if ParamVars.get_outputl():
-                                    toWindow(windows[2], text)
-                                    sendLeft(text, lcon, windows[4])
-                                if ParamVars.get_outputr():
-                                    toWindow(windows[1], text)
-                                    sendRight(text, piggyr, windows[4])
+                                splittext = text.split('\n')
+                                
+                                for each in splittext:    
+                                    if ParamVars.get_outputl():
+                                        toWindow(windows[2], each)
+                                        sendLeft(each, lcon, windows[4])
+                                    if ParamVars.get_outputr():
+                                        toWindow(windows[1], each)
+                                        sendRight(each, piggyr, windows[4])
                                     
                                 
                             if ParamVars.get_noright() == True:
@@ -374,25 +379,25 @@ def main(argv):
                 elif (s == piggyr and piggyr != 0) or s == clientr:
                     try:
                         message = s.recv(size)
+                        if message != '':
+                        #if(ParamVars.get_dsprl()):
+                            toWindow(windows[3], message.decode())
+                            #print("Recieve from the right: %s" %message.decode())
+
+                        
+                            if ParamVars.get_loopl():
+                                toWindow(windows[1], message.decode())
+                                sendRight(message, piggyr, windows[4])
+                            elif not ParamVars.get_noleft():
+                                toWindow(windows[2], message.decode())
+                                sendLeft(message, lcon, windows[4])
+
+                        else:
+                            break
                     except socket.error:
                         windows[4].get_win().addstr(1, 1, "Connection stopped from the right")
                         windows[4].get_win().refresh()
-                    if message != '':
-                        #if(ParamVars.get_dsprl()):
-                        toWindow(windows[3], message.decode())
-                            #print("Recieve from the right: %s" %message.decode())
-
-                        #if(ParamVars.IamMiddle() or ParamVars.IamTail()):
-                        #    if not(ParamVars.get_loopl() and ParamVars.get_loopr()):
-                        if ParamVars.get_loopl():
-                            toWindow(windows[1], message.decode())
-                            sendRight(message, piggyr, windows[4])
-                        elif not ParamVars.get_noleft():
-                            toWindow(windows[2], message.decode())
-                            sendLeft(message, lcon, windows[4])
-
-                    else:
-                        break
+                    
                 #recieve from left
                 elif s == client:
                     lcon = s
