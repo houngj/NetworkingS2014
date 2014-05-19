@@ -52,7 +52,12 @@ class Param:
         self.racctip = None
         self.lacctport = None
         self.racctport = None
-
+        self.dropl = False
+        
+    def get_dropl(self):
+        return self.dropl
+    def set_dropl(self, val):
+        self.dropl = val
     def get_racctport(self):
         return self.racctport
 
@@ -373,7 +378,9 @@ class Param:
                 return True
             except:
                 return "improper IP; Usage: ':racctip IP'"
-            
+        elif message == ":dropl":
+            self.dropl = True;
+            return True
         else:
             return False
 

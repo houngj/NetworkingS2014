@@ -264,7 +264,7 @@ def main(argv):
                                     piggy.bind((socket.gethostname(), int(ParamVars.get_useport())))
                                 listenlTrue = False
                                 piggy.connect((ParamVars.get_laddr(), int(ParamVars.get_useport())))
-                                lcon = piggy
+                                #lcon = piggy
                                 
                                 input.append(piggy)
 
@@ -278,7 +278,7 @@ def main(argv):
                                 for each in splittext:
                                     if ParamVars.get_outputl():
                                         toWindow(windows[2], each)
-                                        sendLeft(each, lcon, windows[4])
+                                        sendLeft(each, client, windows[4])
                                     if ParamVars.get_outputr():
                                         toWindow(windows[1], each)
                                         sendRight(each, piggyr, windows[4])
@@ -296,9 +296,9 @@ def main(argv):
                                 ParamVars.set_outputr(False)
                             if ParamVars.get_noleft() == True:
                                 try:
-                                    if lcon != 0:
-                                        lcon.close()
-                                        input.remove(lcon)
+                                    if client != 0:
+                                        client.close()
+                                        input.remove(client)
                                 except UnboundLocalError:
                                     None
                                 ParamVars.set_outputl(False)
@@ -313,6 +313,13 @@ def main(argv):
                                 
                                 windows[4].get_win().refresh()
                                 ParamVars.set_output(False)
+                            if ParamVars.get_dropl() == True:
+                                try:
+                                    client.close()
+                                    input.remove(client)
+                                    windows[4].get_win().addstr(1, 1, "left connection killed")
+                                except UnboundLocalError:
+                                    None
                         elif Commandval != False:
                             windows[4].get_win().addstr(1, 1, str(Commandval))
                             windows[4].get_win().refresh()
@@ -338,7 +345,7 @@ def main(argv):
                                     if ParamVars.get_outputr():
                                         if ParamVars.get_loopr():
                                             toWindow(windows[2], message.decode())
-                                            sendLeft(message, lcon)
+                                            sendLeft(message, client, windows[4])
                                         else:
                                             toWindow(windows[1], message.decode())
                                             sendRight(message, piggyr, windows[4])
@@ -348,7 +355,7 @@ def main(argv):
                                             sendRight(message, piggyr, windows[4])
                                         else:
                                             toWindow(windows[2], message.decode())
-                                            sendLeft(message, lcon, windows[4])
+                                            sendLeft(message, client, windows[4])
                 
                 #Recieve from right
                 elif (s == piggyr and piggyr != 0) or s == clientr:
@@ -365,7 +372,7 @@ def main(argv):
                                 sendRight(message, piggyr, windows[4])
                             elif not ParamVars.get_noleft():
                                 toWindow(windows[2], message.decode())
-                                sendLeft(message, lcon, windows[4])
+                                sendLeft(message, client, windows[4])
 
                         else:
                             break
@@ -375,7 +382,7 @@ def main(argv):
                     
                 #recieve from left
                 elif s == client:
-                    lcon = s
+                    #lcon = s
 
                     if(ParamVars.checkladdr(s) or ParamVars.checkacctport(s)):
                         windows[4].get_win().addstr(1, 1,"Connection rejected")
