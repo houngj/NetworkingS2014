@@ -1,27 +1,6 @@
 import select, socket, sys, curses, time
 from piggy_util import *
 
-class window:
-    
-    def __init__(self):
-        self.box = None
-        self.row = 1
-        
-    def set_win(self, box):
-        self.box = box
-        
-    
-    def get_win(self):
-        return self.box
-    
-    def get_row(self):
-        return self.row
-        
-    def add_row(self):
-        self.row = self.row+1
-        
-    def set_row(self, num):
-        self.row = num
 
 def sendLeft(message, lcon, errwin):
     try:
@@ -48,10 +27,7 @@ def typed(windows):
     while(1):
         win = windows.get_win()
         ch = win.getch()
-        
-        
         if (ch < 32 and ch != 13 and ch != 27):
-            
             ch = int(ch)
             win.addstr(row, col, str(ch))
             buff.append(str(ch))
@@ -66,7 +42,6 @@ def typed(windows):
             win.clear()
             win.border(0)
             win.refresh()
-            #buff.append("\n")
             break
         
         col = col+1
@@ -113,7 +88,7 @@ def main(argv):
     piggy = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     piggy.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     if ParamVars.get_noleft() == False:
-        piggy.bind(("", 36763))
+        piggy.bind(("", ParamVars.get_useport()))
     piggy.listen(5)
     
     screen = curses.initscr()
@@ -174,9 +149,9 @@ def main(argv):
                         piggyr.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
                         #piggyr.bind((socket.gethostname(), int(ParamVars.get_useport())))
                         listenrTrue = False
-                        piggyr.connect((ParamVars.get_raddr(), 36763))
+                        piggyr.connect((ParamVars.get_raddr(), ParamVars.get_useport()))
                     except socket.error:
-                        windows[4].get_win().addstr(1, 1, "already using this port\n")    
+                        windows[4].get_win().addstr(1, 1, "already using port:" + str(ParamVars.get_useport()))    
                         windows[4].get_win().refresh()
                     
                     
@@ -283,15 +258,15 @@ def main(argv):
                         
                                 
                                 ParamVars.set_connectlinput(False)
-                                piggyl = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                                piggy = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                                 if int(ParamVars.get_useport()) != 36763:
-                                    piggyl.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-                                    piggyl.bind((socket.gethostname(), int(ParamVars.get_useport())))
+                                    piggy.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+                                    piggy.bind((socket.gethostname(), int(ParamVars.get_useport())))
                                 listenlTrue = False
-                                piggyl.connect((ParamVars.get_laddr(), int(ParamVars.get_useport())))
-                                lcon = piggyl
+                                piggy.connect((ParamVars.get_laddr(), int(ParamVars.get_useport())))
+                                lcon = piggy
                                 
-                                input.append(piggyl)
+                                input.append(piggy)
 
                             if ParamVars.get_readFile() != None:
                                 ParamVars.set_readFile(None)
@@ -300,7 +275,7 @@ def main(argv):
                                 text = file.read()
                                 splittext = text.split('\n')
                                 
-                                for each in splittext:    
+                                for each in splittext:
                                     if ParamVars.get_outputl():
                                         toWindow(windows[2], each)
                                         sendLeft(each, lcon, windows[4])

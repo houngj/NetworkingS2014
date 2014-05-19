@@ -1,6 +1,29 @@
 import argparse, socket, sys
 
 
+class window:
+    
+    def __init__(self):
+        self.box = None
+        self.row = 1
+        
+    def set_win(self, box):
+        self.box = box
+        
+    
+    def get_win(self):
+        return self.box
+    
+    def get_row(self):
+        return self.row
+        
+    def add_row(self):
+        self.row = self.row+1
+        
+    def set_row(self, num):
+        self.row = num
+
+
 
 
 
