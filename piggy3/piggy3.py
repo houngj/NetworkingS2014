@@ -320,6 +320,7 @@ def main(argv):
                                     windows[4].get_win().addstr(1, 1, "left connection killed")
                                 except UnboundLocalError:
                                     windows[4].get_win().addstr(1, 1, "Holy crap something went wrong")
+                                ParamVars.set_dropl(False)
                             if ParamVars.get_dropr() == True:
                                 try:
                                     piggyr.close()
@@ -327,6 +328,7 @@ def main(argv):
                                     windows[4].get_win().addstr(1, 1, "right connection killed")
                                 except UnboundLocalError:
                                     None
+                                ParamVars.set_dropr(False)
                         elif Commandval != False:
                             windows[4].get_win().addstr(1, 1, str(Commandval))
                             windows[4].get_win().refresh()
