@@ -53,14 +53,20 @@ class Param:
         self.lacctport = None
         self.racctport = None
         self.dropl = False
-        
+        self.dropr = False
+
     def get_dropl(self):
         return self.dropl
     def set_dropl(self, val):
         self.dropl = val
+    
+    def get_dropr(self):
+        return self.dropr
+    def set_dropr(self, val):
+        self.dropr = val
+    
     def get_racctport(self):
-        return self.racctport
-
+        return self.racctport    
     def get_lacctport(self):
         return self.lacctport
     def get_lacctip(self):
@@ -381,7 +387,12 @@ class Param:
         elif message == ":dropl":
             self.dropl = True;
             return True
+        elif message == ":dropr":
+            self.dropr = True;
+            return True
         else:
             return False
+        
+        
 
     

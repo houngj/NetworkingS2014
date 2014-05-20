@@ -319,6 +319,13 @@ def main(argv):
                                     input.remove(client)
                                     windows[4].get_win().addstr(1, 1, "left connection killed")
                                 except UnboundLocalError:
+                                    windows[4].get_win().addstr(1, 1, "Holy crap something went wrong")
+                            if ParamVars.get_dropr() == True:
+                                try:
+                                    piggyr.close()
+                                    input.remove(piggyr)
+                                    windows[4].get_win().addstr(1, 1, "right connection killed")
+                                except UnboundLocalError:
                                     None
                         elif Commandval != False:
                             windows[4].get_win().addstr(1, 1, str(Commandval))
