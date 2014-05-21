@@ -57,8 +57,15 @@ def toWindow(window, message):
     
         
     try:
+        
+        
+        
         window.get_win().addstr(window.get_row(), 1, message)
+        
+        for i in range((len(message)/36)):
+            window.add_row()
         window.add_row()
+        
         window.get_win().border(0)
         window.get_win().refresh()
     except curses.error:
@@ -284,25 +291,25 @@ def main(argv):
                                         sendRight(each, piggyr, windows[4])
                                     
                                 
-                            if ParamVars.get_noright() == True:
-                                try:
-                                    if piggyr != 0:
-                                        piggyr.close()
-                                        input.remove(piggyr)
-                                        rfound = False
-                                except UnboundLocalError, AttributeError:
-                                    None
-                                ParamVars.set_outputl(True)
-                                ParamVars.set_outputr(False)
-                            if ParamVars.get_noleft() == True:
-                                try:
-                                    if client != 0:
-                                        client.close()
-                                        input.remove(client)
-                                except UnboundLocalError:
-                                    None
-                                ParamVars.set_outputl(False)
-                                ParamVars.set_outputr(True)
+                            #if ParamVars.get_noright() == True:
+                            #    try:
+                            #        if piggyr != 0:
+                            #            piggyr.close()
+                            #            input.remove(piggyr)
+                            #            rfound = False
+                            #    except UnboundLocalError, AttributeError:
+                            #        None
+                            #    ParamVars.set_outputl(True)
+                            #    ParamVars.set_outputr(False)
+                            #if ParamVars.get_noleft() == True:
+                            #    try:
+                            #        if client != 0:
+                            #            client.close()
+                            #            input.remove(client)
+                            #    except UnboundLocalError:
+                            #        None
+                            #    ParamVars.set_outputl(False)
+                            #    ParamVars.set_outputr(True)
                             if ParamVars.get_output() == True:
                                 if ParamVars.get_outputl() == True:
                                     windows[4].get_win().addstr(1, 1, "output is to the left")
@@ -432,6 +439,5 @@ def main(argv):
         curses.nocbreak()
         curses.echo()
         curses.endwin()
-
 if __name__=="__main__":
     main(sys.argv[1:])
